@@ -168,7 +168,6 @@ int main()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture1);
         
-        
         // render contaniner 
         ourShader.use();
         glBindVertexArray(VAO);

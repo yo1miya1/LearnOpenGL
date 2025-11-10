@@ -13,6 +13,6 @@ void main()
 	vec2 uv0 = TexCoord;
 	vec2 uv1 = TexCoord * 0.1 + 0.5;
 	vec4 col0 = texture(tex0, uv0);
-	vec4 col1 = texture(tex1, uv0);
-	FragColor = mix(col0, col1, 0.2);
+	vec4 col1 = texture(tex1, uv1);
+	FragColor = mix(col0, col1, 0.8);
 }
