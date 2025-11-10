@@ -1,0 +1,6 @@
+﻿  glad.c
+  main.cpp
+D:\OpenGL\OpenGL_Packet\include\tool\shader.h(54,40): warning C4101: “e”: 未引用的局部变量
+  (编译源文件“src/main.cpp”)
+  
+  pac01.vcxproj -> D:\OpenGL\OpenGL_Packet\bin\pac01.exe
