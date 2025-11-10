@@ -38,8 +38,10 @@ public:
 
         try
         {
-            vShaderFile.open(vertexFullPath.c_str());  // 使用 c_str() 转换
+            vShaderFile.open(vertexFullPath.c_str());
+            if (!vShaderFile.is_open()) {std::cout << "ERROR::VertexShaderFilePath is not valid" << std::endl;}
             fShaderFile.open(fragmentFullPath.c_str());
+            if (!vShaderFile.is_open()) {std::cout << "ERROR::FragmentShaderFilePath is not valid" << std::endl;}
 
             std::stringstream vShaderStream, fShaderStream;
             vShaderStream << vShaderFile.rdbuf();
