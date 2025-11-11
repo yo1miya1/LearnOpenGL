@@ -2,7 +2,14 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "tool/shader.h"//加载着色器所需的头文件
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <iostream>
+using namespace std;
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "tool/stb_image.h"//加载纹理所需的头文件
 
@@ -10,7 +17,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
 // 设置路径
-std::string Shader::dirName = "";
+string Shader::dirName = "";
 
 int main()
 {
@@ -26,7 +33,7 @@ int main()
     GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
     {
-        std::cout << "Failed to create GLFW window" << std::endl;
+        cout << "Failed to create GLFW window" << endl;
         glfwTerminate();
         return -1;
     }
@@ -35,7 +42,7 @@ int main()
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        std::cout << "Failed to initialize GLAD" << std::endl;
+        cout << "Failed to initialize GLAD" << endl;
         return -1;
     }
 
@@ -138,7 +145,7 @@ int main()
     }
     else
     {
-        std::cout << "WARNING::TEXTURE1 DON`T LOAD!" << std::endl;
+        cout << "WARNING::TEXTURE1 DON`T LOAD!" << endl;
     }
     //释放图像内存
     stbi_image_free(data);
@@ -148,8 +155,15 @@ int main()
     ourShader.setInt("tex1", 1);
 
 
+    // 初始化一个4分量向量
+    glm::vec4 vec = glm::vec4(1.0, 1.0, 1.0, 1.0);
+    // 初始化一个单位矩阵
+    glm::mat4 trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f));
 
 
+    // 矩阵乘向量
+    vec = trans * vec;
+    cout << vec.x << "------" << vec.y << "------" << vec.z << endl;
 
 
     //渲染循环
