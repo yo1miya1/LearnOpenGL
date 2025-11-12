@@ -1,23 +1,29 @@
-//2025.11.10 修改注释内容 与 加载纹理对象
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include "tool/shader.h"//加载着色器所需的头文件
+#include "main.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
-#include <iostream>
-using namespace std;
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "tool/stb_image.h"//加载纹理所需的头文件
+// 定义
+void processInput(GLFWwindow* window)// 处理按键输入
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+}
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)//窗口大小变化回调函数
+{
+    glViewport(0, 0, width, height);
+}
+void printAngle(float _angle)
+{
+    cout << _angle << endl;
+}
+glm::mat4 transMat(glm::mat4 _mat, glm::vec3 _rotAixs, float _angle, glm::vec3 _scale, glm::vec3 _pos)
+{
+    _mat = glm::translate(_mat, _pos);//平移
+    _mat = glm::rotate(_mat, glm::radians(_angle), _rotAixs);//旋转
+    _mat = glm::scale(_mat, _scale);//缩放
+    return _mat;
+}
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow* window);
-
-// 设置路径
-string Shader::dirName = "";
 
 int main()
 {
@@ -39,15 +45,11 @@ int main()
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         cout << "Failed to initialize GLAD" << endl;
         return -1;
     }
-
-
-
     // Shader
     // 路径中的 " . " 指代工程目录，是 ".vcxproj" 文件所在目录
     Shader ourShader("./src/shader/vertex.glsl", "./src/shader/fragment.glsl");
@@ -68,6 +70,7 @@ int main()
     };
 
 
+
     // VBO, VAO, EBO的创建、绑定
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
@@ -82,7 +85,6 @@ int main()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-
     // 设置顶点位置属性指针
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -95,14 +97,10 @@ int main()
 
 
 
-
-
-
-
     //声明纹理
-    unsigned int texture0, texture1;
-    glGenTextures(1, &texture0);
-    glBindTexture(GL_TEXTURE_2D, texture0);
+    unsigned int tex0, tex1;
+    glGenTextures(1, &tex0);
+    glBindTexture(GL_TEXTURE_2D, tex0);
     //设置纹理参数
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -115,21 +113,17 @@ int main()
     //路径， 宽度， 高度， 通道数， 加载标志
     unsigned char* data = stbi_load("./static/texture/container.jpg", &width, &height, &nrChannels, 0);
     //检查并生成纹理
-    if (data)
-    {
+    if (data){
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "WARNING::TEXTURE0 DON`T LOAD!" << std::endl;
-    }
+        glGenerateMipmap(GL_TEXTURE_2D);}
+    else {
+        std::cout << "WARNING::TEXTURE0 DON`T LOAD!" << std::endl;}
     //释放图像内存
     stbi_image_free(data);
 
     //第二个纹理
-    glGenTextures(1, &texture1);
-    glBindTexture(GL_TEXTURE_2D, texture1);
+    glGenTextures(1, &tex1);
+    glBindTexture(GL_TEXTURE_2D, tex1);
     //设置纹理参数
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -138,35 +132,37 @@ int main()
     //路径， 宽度， 高度， 通道数， 加载标志
     data = stbi_load("./static/texture/awesomeface.png", &width, &height, &nrChannels, 0);
     //检查并生成纹理
-    if (data)
-    {
+    if (data){
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        cout << "WARNING::TEXTURE1 DON`T LOAD!" << endl;
-    }
+        glGenerateMipmap(GL_TEXTURE_2D);}
+    else{
+        cout << "WARNING::TEXTURE1 DON`T LOAD!" << endl;}
     //释放图像内存
     stbi_image_free(data);
-
+    
+    // 传参
     ourShader.use();
     ourShader.setInt("tex0", 0);
     ourShader.setInt("tex1", 1);
 
 
-    // 初始化一个4分量向量
-    glm::vec4 vec = glm::vec4(1.0, 1.0, 1.0, 1.0);
-    // 初始化一个单位矩阵
-    glm::mat4 trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f));
 
 
-    // 矩阵乘向量
-    vec = trans * vec;
-    cout << vec.x << "------" << vec.y << "------" << vec.z << endl;
+    // 变换矩阵
+    // 初始化
+    glm::mat4 trans = glm::mat4(1.0f);
+    glm::vec3 rotAxis = glm::vec3(0.0f, 0.0f, 1.0f);
+    float angle = 0.0f;
+    glm::vec3 scale = glm::vec3(0.5f, 0.5f, 0.5f);
+    glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f);
+    
+    glm::mat4 myTransMat = transMat(trans, rotAxis, angle, scale, pos);
 
+    //向着色器传参
+    unsigned int transLoc = glGetUniformLocation(ourShader.ID, "vs_trans");//获取变换矩阵的位置
+    glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(trans));//传参
 
-    //渲染循环
+    // 渲染循环
     while (!glfwWindowShouldClose(window))
     {
         // input
@@ -175,42 +171,31 @@ int main()
         // render
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-
-        // bind texture
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture0);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, texture1);
-        
-        
-        // render contaniner 
+        // 使用着色器
         ourShader.use();
+        // 由于需要动态效果，所以每帧传参
+        angle = glfwGetTime() * 90.0f;
+        myTransMat = transMat(trans, rotAxis, angle, scale, pos);
+        glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(myTransMat));
+        trans = glm::mat4(1.0f);
+
+        // 绑定 texture
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, tex0);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, tex1);
+        // 绑定VAO
         glBindVertexArray(VAO);
+        // 绘制
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        //更新窗口
+        // 更新窗口
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-    // 释放资源
+    // 手动释放资源
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
-    // glfw销毁
-    glfwTerminate();
+    glfwTerminate();// glfw销毁
     return 0;
-}
-
-
-
-//处理按键输入
-void processInput(GLFWwindow* window)
-{
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-}
-
-//窗口大小变化回调函数
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
 }
