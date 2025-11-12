@@ -18,10 +18,18 @@ void printAngle(float _angle)
 }
 glm::mat4 transMat(glm::mat4 _mat, glm::vec3 _rotAixs, float _angle, glm::vec3 _scale, glm::vec3 _pos)
 {
-    _mat = glm::translate(_mat, _pos);//平移
-    _mat = glm::rotate(_mat, glm::radians(_angle), _rotAixs);//旋转
-    _mat = glm::scale(_mat, _scale);//缩放
+    _mat = glm::translate(_mat, _pos);
+    _mat = glm::rotate(_mat, glm::radians(_angle), _rotAixs);
+    _mat = glm::scale(_mat, _scale);
     return _mat;
+}
+void resetTransMats(glm::mat4 _mat, glm::vec3 _rotAixs, float _angle, glm::vec3 _scale, glm::vec3 _pos)
+{
+    _angle = 0.0f;
+    _mat = glm::mat4(1.0f);
+    _rotAixs = glm::vec3(0.0f, 0.0f, 1.0f);
+    _scale = glm::vec3(1.0f, 1.0f, 1.0f);
+    _pos = glm::vec3(0.0f, 0.0f, 0.0f);
 }
 
 
@@ -151,46 +159,60 @@ int main()
     // 变换矩阵
     // 初始化
     glm::mat4 trans = glm::mat4(1.0f);
-    glm::vec3 rotAxis = glm::vec3(0.0f, 0.0f, 1.0f);
-    float angle = 0.0f;
-    glm::vec3 scale = glm::vec3(0.5f, 0.5f, 0.5f);
-    glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f);
     
-    glm::mat4 myTransMat = transMat(trans, rotAxis, angle, scale, pos);
-
+    float angle1 = 0.0f;
+    glm::vec3 scale1 = glm::vec3(0.5f, 0.5f, 0.5f);
+    glm::mat4 trans1 = transMat(trans, glm::vec3(0.0f, 0.0f, 1.0f), angle1, scale1, glm::vec3(0.5f, -0.5f, 0.0f));
+    
+    glm::vec3 scale2 = glm::vec3(   (sin(glfwGetTime()) + 2) * 0.25f,
+                                    (sin(glfwGetTime()) + 2) * 0.25f,
+                                    1.0f);
+    glm::mat4 trans2 = transMat(trans, glm::vec3(0.0f, 0.0f, 1.0f), 0.0f, scale2, glm::vec3(-0.5f, 0.5f, 0.0f));
+    
     //向着色器传参
     unsigned int transLoc = glGetUniformLocation(ourShader.ID, "vs_trans");//获取变换矩阵的位置
-    glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(trans));//传参
-
     // 渲染循环
     while (!glfwWindowShouldClose(window))
     {
         // input
         processInput(window);
-        
+
         // render
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        // 使用着色器
-        ourShader.use();
-        // 由于需要动态效果，所以每帧传参
-        angle = glfwGetTime() * 90.0f;
-        myTransMat = transMat(trans, rotAxis, angle, scale, pos);
-        glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(myTransMat));
-        trans = glm::mat4(1.0f);
-
+        
         // 绑定 texture
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, tex0);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, tex1);
-        // 绑定VAO
+
+        // 使用着色器
+        ourShader.use();
+
+        // one
+        angle1 = glfwGetTime() * 90.0f;
+        trans1 = transMat(trans, glm::vec3(0.0f, 0.0f, 1.0f), angle1, scale1, glm::vec3(0.5f, -0.5f, 0.0f));
+        glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(trans1));
+        trans = glm::mat4(1.0f);
+
         glBindVertexArray(VAO);
-        // 绘制
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_POINTS, 6, GL_UNSIGNED_INT, 0);
+
+        scale2 = glm::vec3( (sin(glfwGetTime()) + 2) * 0.25f,
+                            (sin(glfwGetTime()) + 2) * 0.25f,
+                            1.0f);
+        trans2 = transMat(trans, glm::vec3(0.0f, 0.0f, 1.0f), 0.0f, scale2, glm::vec3(-0.5f, 0.5f, 0.0f));
+        glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(trans2));
+        trans = glm::mat4(1.0f);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_POINTS, 6, GL_UNSIGNED_INT, 0);
+
         // 更新窗口
         glfwSwapBuffers(window);
         glfwPollEvents();
+
     }
     // 手动释放资源
     glDeleteVertexArrays(1, &VAO);

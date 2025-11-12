@@ -26,3 +26,4 @@ void processInput(GLFWwindow* window);
 void printAngle(float _angle);
 
 glm::mat4 transMat(glm::mat4 _mat,  glm::vec3 _rotAixs, float _angle, glm::vec3 _scale, glm::vec3 _pos);
+void resetTransMats(glm::mat4 _mat, glm::vec3 _rotAixs, float _angle, glm::vec3 _scale, glm::vec3 _pos);

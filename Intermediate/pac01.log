@@ -9,5 +9,5 @@ D:\OpenGL\OpenGL_Packet\include\tool\shader.h(1,1): warning C4819: 该文件包�
 D:\OpenGL\OpenGL_Packet\include\tool\shader.h(56,40): warning C4101: “e”: 未引用的局部变量
   (编译源文件“src/main.cpp”)
   
-D:\OpenGL\OpenGL_Packet\pac01\src\main.cpp(177,31): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+D:\OpenGL\OpenGL_Packet\pac01\src\main.cpp(194,32): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
   pac01.vcxproj -> D:\OpenGL\OpenGL_Packet\bin\pac01.exe
