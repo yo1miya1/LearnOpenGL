@@ -147,25 +147,6 @@ int main()
     ourShader.use();
     ourShader.setInt("tex0", 0);
     ourShader.setInt("tex1", 1);
-
-
-
-
-    // 变换矩阵
-    // 初始化
-    glm::mat4 trans = glm::mat4(1.0f);
-    
-    float angle1 = 0.0f;
-    glm::vec3 scale1 = glm::vec3(0.5f, 0.5f, 0.5f);
-    glm::mat4 trans1 = transMat(trans, glm::vec3(0.0f, 0.0f, 1.0f), angle1, scale1, glm::vec3(0.5f, -0.5f, 0.0f));
-    
-    glm::vec3 scale2 = glm::vec3(   (sin(glfwGetTime()) + 2) * 0.25f,
-                                    (sin(glfwGetTime()) + 2) * 0.25f,
-                                    1.0f);
-    glm::mat4 trans2 = transMat(trans, glm::vec3(0.0f, 0.0f, 1.0f), 0.0f, scale2, glm::vec3(-0.5f, 0.5f, 0.0f));
-    
-    //向着色器传参
-    unsigned int transLoc = glGetUniformLocation(ourShader.ID, "vs_trans");//获取变换矩阵的位置
     // 渲染循环
     while (!glfwWindowShouldClose(window))
     {
@@ -185,22 +166,7 @@ int main()
         // 使用着色器
         ourShader.use();
 
-        // one
-        angle1 = glfwGetTime() * 90.0f;
-        trans1 = transMat(trans, glm::vec3(0.0f, 0.0f, 1.0f), angle1, scale1, glm::vec3(0.5f, -0.5f, 0.0f));
-        glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(trans1));
-        trans = glm::mat4(1.0f);
-
         glBindVertexArray(Plane1.VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glDrawElements(GL_POINTS, 6, GL_UNSIGNED_INT, 0);
-
-        scale2 = glm::vec3( (sin(glfwGetTime()) + 2) * 0.25f,
-                            (sin(glfwGetTime()) + 2) * 0.25f,
-                            1.0f);
-        trans2 = transMat(trans, glm::vec3(0.0f, 0.0f, 1.0f), 0.0f, scale2, glm::vec3(-0.5f, 0.5f, 0.0f));
-        glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(trans2));
-        trans = glm::mat4(1.0f);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glDrawElements(GL_POINTS, 6, GL_UNSIGNED_INT, 0);
 

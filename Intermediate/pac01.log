@@ -50,5 +50,4 @@ D:\OpenGL\OpenGL_Packet\include\geometry\PlaneGeometry.h(55,33): warning C4244: 
 D:\OpenGL\OpenGL_Packet\include\geometry\PlaneGeometry.h(55,33): warning C4244:         ]
   (编译源文件“src/main.cpp”)
   
-D:\OpenGL\OpenGL_Packet\pac01\src\main.cpp(189,32): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
   pac01.vcxproj -> D:\OpenGL\OpenGL_Packet\bin\pac01.exe
