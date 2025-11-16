@@ -1,5 +1,36 @@
-#include "main.h"
+﻿//#include "main.h"
 
+//#pragma once
+// OpenGL 初始化库
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include "tool/shader.h"// Shader
+// glm 数学库
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+// 系统库
+#include <iostream>
+using namespace std;
+// 纹理
+#define STB_IMAGE_IMPLEMENTATION
+#include "tool/stb_image.h"// stb_image
+#include "geometry/PlaneGeometry.h"
+
+
+
+
+// 初始化shader路径
+string Shader::dirName = "";
+
+
+// 函数声明
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void processInput(GLFWwindow* window);
+void printAngle(float _angle);
+
+glm::mat4 transMat(glm::mat4 _mat, glm::vec3 _rotAixs, float _angle, glm::vec3 _scale, glm::vec3 _pos);
+void resetTransMats(glm::mat4 _mat, glm::vec3 _rotAixs, float _angle, glm::vec3 _scale, glm::vec3 _pos);
 
 
 // 定义
@@ -62,47 +93,11 @@ int main()
     // 路径中的 " . " 指代工程目录，是 ".vcxproj" 文件所在目录
     Shader ourShader("./src/shader/vertex.glsl", "./src/shader/fragment.glsl");
 
-
-
-    // 顶点数据
-    float vertices[] = {
-        // positions          // colors           // texture coords
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left 
-    };
-    unsigned int indices[] = {
-        0, 1, 3, // first triangle
-        1, 2, 3  // second triangle
-    };
+    PlaneGeometry Plane1;
 
 
 
-    // VBO, VAO, EBO的创建、绑定
-    unsigned int VBO, VAO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-    // 绑定VAO
-    glBindVertexArray(VAO);
-    // 绑定VBO
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    // 绑定EBO
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // 设置顶点位置属性指针
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // 设置顶点颜色属性指针
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    // 顶点纹理坐标属性指针
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-
+    
 
 
     //声明纹理
@@ -196,7 +191,7 @@ int main()
         glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(trans1));
         trans = glm::mat4(1.0f);
 
-        glBindVertexArray(VAO);
+        glBindVertexArray(Plane1.VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glDrawElements(GL_POINTS, 6, GL_UNSIGNED_INT, 0);
 
@@ -215,9 +210,7 @@ int main()
 
     }
     // 手动释放资源
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
+    Plane1.dispose();
     glfwTerminate();// glfw销毁
     return 0;
 }
