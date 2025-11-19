@@ -1,68 +1,4 @@
-﻿//#include "main.h"
-
-//#pragma once
-// OpenGL 初始化库
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include "tool/shader.h"// Shader
-// glm 数学库
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-// 系统库
-#include <iostream>
-using namespace std;
-// 纹理
-#define STB_IMAGE_IMPLEMENTATION
-#include "tool/stb_image.h"// stb_image
-#include "geometry/PlaneGeometry.h"
-
-
-
-
-// 初始化shader路径
-string Shader::dirName = "";
-
-
-// 函数声明
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow* window);
-void printAngle(float _angle);
-
-glm::mat4 transMat(glm::mat4 _mat, glm::vec3 _rotAixs, float _angle, glm::vec3 _scale, glm::vec3 _pos);
-void resetTransMats(glm::mat4 _mat, glm::vec3 _rotAixs, float _angle, glm::vec3 _scale, glm::vec3 _pos);
-
-
-// 定义
-void processInput(GLFWwindow* window)// 处理按键输入
-{
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-}
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)//窗口大小变化回调函数
-{
-    glViewport(0, 0, width, height);
-}
-void printAngle(float _angle)
-{
-    cout << _angle << endl;
-}
-glm::mat4 transMat(glm::mat4 _mat, glm::vec3 _rotAixs, float _angle, glm::vec3 _scale, glm::vec3 _pos)
-{
-    _mat = glm::translate(_mat, _pos);
-    _mat = glm::rotate(_mat, glm::radians(_angle), _rotAixs);
-    _mat = glm::scale(_mat, _scale);
-    return _mat;
-}
-void resetTransMats(glm::mat4 _mat, glm::vec3 _rotAixs, float _angle, glm::vec3 _scale, glm::vec3 _pos)
-{
-    _angle = 0.0f;
-    _mat = glm::mat4(1.0f);
-    _rotAixs = glm::vec3(0.0f, 0.0f, 1.0f);
-    _scale = glm::vec3(1.0f, 1.0f, 1.0f);
-    _pos = glm::vec3(0.0f, 0.0f, 0.0f);
-}
-
+﻿#include "main.h"
 
 int main()
 {
@@ -75,7 +11,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
     // 创建窗口, 并设置回调函数
-    GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
     {
         cout << "Failed to create GLFW window" << endl;
@@ -83,21 +19,34 @@ int main()
         return -1;
     }
     glfwMakeContextCurrent(window);
+
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         cout << "Failed to initialize GLAD" << endl;
         return -1;
     }
+    // 设置视口
+    glViewport(0, 0, screenWidth, screenHeight);
+    glEnable(GL_PROGRAM_POINT_SIZE);
+    //glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glEnable(GL_DEPTH_TEST);// 开启深度测试
+    //glDepthFunc(GL_LESS);// 设置深度测试方式为小于
+    // 打印OpenGL版本信息
+    cout << "OpenGL Version: " << glGetString(GL_VERSION) << endl;
+    // 打印GPU信息
+    cout << "GPU: " << glGetString(GL_RENDERER) << endl;
+
+
+
     // Shader
     // 路径中的 " . " 指代工程目录，是 ".vcxproj" 文件所在目录
     Shader ourShader("./src/shader/vertex.glsl", "./src/shader/fragment.glsl");
 
-    PlaneGeometry Plane1;
-
-
-
-    
+    PlaneGeometry Plane1(1.0, 1.0);
+    BoxGeometry Box1(1.0, 1.0, 1.0);
 
 
     //声明纹理
@@ -147,6 +96,22 @@ int main()
     ourShader.use();
     ourShader.setInt("tex0", 0);
     ourShader.setInt("tex1", 1);
+
+
+    glm::vec3 cubePositions[] = {
+          glm::vec3(0.0f,  0.0f,  0.0f),
+          glm::vec3(2.0f,  5.0f, -15.0f),
+          glm::vec3(-1.5f, -2.2f, -2.5f),
+          glm::vec3(-3.8f, -2.0f, -12.3f),
+          glm::vec3(2.4f, -0.4f, -3.5f),
+          glm::vec3(-1.7f,  3.0f, -7.5f),
+          glm::vec3(1.3f, -2.0f, -2.5f),
+          glm::vec3(1.5f,  2.0f, -2.5f),
+          glm::vec3(1.5f,  0.2f, -1.5f),
+          glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
+    
+
     // 渲染循环
     while (!glfwWindowShouldClose(window))
     {
@@ -155,7 +120,11 @@ int main()
 
         // render
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        // 清楚缓冲
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // 使用着色器
+        ourShader.use();
         
         // 绑定 texture
         glActiveTexture(GL_TEXTURE0);
@@ -163,20 +132,94 @@ int main()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, tex1);
 
-        // 使用着色器
-        ourShader.use();
 
-        glBindVertexArray(Plane1.VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glDrawElements(GL_POINTS, 6, GL_UNSIGNED_INT, 0);
+        glm::mat4 view = glm::mat4(1.0f);
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -5.0f));
 
+        glm::mat4 projection = glm::mat4(1.0f);
+        projection = glm::perspective(glm::radians(45.0f), screenWidth /screenHeight, 0.1f, 100.0f);
+        
+        ourShader.setMat4("view", view);
+        ourShader.setMat4("projection", projection);
+
+        glBindVertexArray(Box1.VAO);
+        for (unsigned int i = 0; i < 10; i++)
+        {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            if (i % 3 == 0)
+                angle = glfwGetTime() * 25.0f;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            ourShader.setMat4("model", model);
+            glDrawElements(GL_TRIANGLES, Box1.indices.size(), GL_UNSIGNED_INT, 0);
+        }
         // 更新窗口
         glfwSwapBuffers(window);
         glfwPollEvents();
-
     }
     // 手动释放资源
-    Plane1.dispose();
-    glfwTerminate();// glfw销毁
+    Box1.dispose();
+    glfwTerminate();
     return 0;
 }
+
+
+// 定义
+void processInput(GLFWwindow* window)// 处理按键输入
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+}
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)//窗口大小变化回调函数
+{
+    glViewport(0, 0, width, height);
+}
+void printAngle(float _angle)
+{
+    cout << _angle << endl;
+}
+glm::mat4 transMat(glm::mat4 _mat,      // 变换矩阵
+    glm::vec3 _rotAixs,                 // 旋转轴
+    float _angle,                       // 旋转角度
+    glm::vec3 _scale,                   // 缩放比例
+    glm::vec3 _pos)                     // 位置
+{
+    _mat = glm::translate(_mat, _pos);
+    _mat = glm::rotate(_mat, glm::radians(_angle), _rotAixs);
+    _mat = glm::scale(_mat, _scale);
+    return _mat;
+}
+void resetTransMats(glm::mat4 _mat,     // 变换矩阵
+    glm::vec3 _rotAixs,                 // 旋转轴
+    float _angle,                       // 旋转角度
+    glm::vec3 _scale,                   // 缩放比例
+    glm::vec3 _pos)                     // 位置
+{
+    _angle = 0.0f;
+    _mat = glm::mat4(1.0f);
+    _rotAixs = glm::vec3(0.0f, 0.0f, 1.0f);
+    _scale = glm::vec3(1.0f, 1.0f, 1.0f);
+    _pos = glm::vec3(0.0f, 0.0f, 0.0f);
+}
+glm::mat4 Mat4_MVP( float M_angle,      // 模型角度
+                    glm::vec3 M_Aixs,   // 旋转轴
+                    glm::vec3 V_pos,    // 视角位置
+                    float P_angle,      // 视角角度
+                    float P_width,      // 屏幕宽
+                    float P_height,     // 屏幕高
+                    float P_Near,       // 近裁平面
+                    float P_Far)        // 远裁平面
+{
+    glm::mat4 model = glm::mat4(1.0f);
+    glm::mat4 view = glm::mat4(1.0f);
+    glm::mat4 projection = glm::mat4(1.0f);
+
+    model = glm::rotate(model, M_angle, M_Aixs);
+    view = glm::translate(view, V_pos);
+    projection = glm::perspective(P_angle, P_width / P_height, P_Near, P_Far);
+
+    return projection * view * model;
+}
+
+

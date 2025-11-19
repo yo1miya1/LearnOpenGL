@@ -1,4 +1,4 @@
-#ifndef SHADER_H
+﻿#ifndef SHADER_H
 #define SHADER_H
 
 #include <glad/glad.h>
@@ -15,17 +15,21 @@ class Shader
 public:
     unsigned int ID;
     static std::string dirName;
-
+    static bool lookShaderPath;
     // constructor generates the shader on the fly
     // ------------------------------------------------------------------------
     Shader(const char* vertexPath, const char* fragmentPath)
     {
+
         // 构建完整路径
         std::string vertexFullPath = dirName + vertexPath;
         std::string fragmentFullPath = dirName + fragmentPath;
-
-        std::cout << "Loading vertex shader: " << vertexFullPath << std::endl;
-        std::cout << "Loading fragment shader: " << fragmentFullPath << std::endl;
+        if (lookShaderPath)
+        {
+            std::cout << "Loading vertex shader: " << vertexFullPath << std::endl;
+            std::cout << "Loading fragment shader: " << fragmentFullPath << std::endl;
+        }
+        
 
         // 使用完整路径继续处理...
         std::string vertexCode;
