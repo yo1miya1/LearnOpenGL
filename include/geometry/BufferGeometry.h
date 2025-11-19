@@ -1,4 +1,4 @@
-#ifndef BUFFER_GROMETRY
+﻿#ifndef BUFFER_GROMETRY
 #define BUFFER_GROMETRY
 #include <glm/glm.hpp>
 #include <glm/gtx/euler_angles.hpp>

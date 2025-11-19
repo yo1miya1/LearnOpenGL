@@ -59,7 +59,7 @@ public:
         }
         catch (std::ifstream::failure& e)
         {
-            std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+            std::cout << "ERROR::SHADER::" << e.what() << std::endl;
         }
 
         const char* vShaderCode = vertexCode.c_str();
