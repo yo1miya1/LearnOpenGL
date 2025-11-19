@@ -135,6 +135,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="src\shader\fragment.glsl" />
+    <None Include="src\shader\lightfs.glsl" />
+    <None Include="src\shader\lightvs.glsl" />
+    <None Include="src\shader\light_frag.glsl" />
+    <None Include="src\shader\light_vert.glsl" />
     <None Include="src\shader\vertex.glsl" />
   </ItemGroup>
   <ItemGroup>

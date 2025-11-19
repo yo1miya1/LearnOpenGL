@@ -25,6 +25,10 @@
   <ItemGroup>
     <None Include="src\shader\vertex.glsl" />
     <None Include="src\shader\fragment.glsl" />
+    <None Include="src\shader\light_frag.glsl" />
+    <None Include="src\shader\light_vert.glsl" />
+    <None Include="src\shader\lightfs.glsl" />
+    <None Include="src\shader\lightvs.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\main.h">

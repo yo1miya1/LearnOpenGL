@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 // OpenGL 初始化库
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
@@ -12,8 +12,6 @@
 #include "tool/stb_image.h"// stb_image
 // 几何体
 #include "geometry/BoxGeometry.h"
-#include "geometry/PlaneGeometry.h"
-#include "geometry/SphereGeometry.h"
 // Camera
 #include "tool/camera.h"
 // 系统库
@@ -25,8 +23,8 @@ using namespace std;
 float SCR_WIDTH = 800.0f;
 float SCR_HEIGHT = 600.0f;
 string Shader::dirName = "";
-bool Shader::lookShaderPath = true;
-const bool printInfo = true;
+bool Shader::lookShaderPath = false;
+const bool printInfo = false;
 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
@@ -35,7 +33,6 @@ bool firstMouse = true;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
-float fov = 55.0f;
 
 
 glm::mat4 model = glm::mat4(1.0f);
@@ -43,7 +40,7 @@ glm::mat4 view = glm::mat4(1.0f);
 glm::mat4 projection = glm::mat4(1.0f);
 
 
-glm::vec3 lightPosition(1.2f, 1.0f, 2.0f);
+
 
 
 
