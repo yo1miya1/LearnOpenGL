@@ -21,12 +21,12 @@
 using namespace std;
 
 
+
 // OpenGL Settings
-float SCR_WIDTH = 800.0f;
-float SCR_HEIGHT = 600.0f;
+float SCR_WIDTH = 1920.0f;
+float SCR_HEIGHT = 1080.0f;
 string Shader::dirName = "";
 bool Shader::lookShaderPath = true;
-const bool printInfo = true;
 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
@@ -37,13 +37,13 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 float fov = 55.0f;
 
-
 glm::mat4 model = glm::mat4(1.0f);
-glm::mat4 view = glm::mat4(1.0f);
+glm::mat4 view = camera.GetViewMatrix();
 glm::mat4 projection = glm::mat4(1.0f);
 
-
-glm::vec3 lightPosition(1.2f, 1.0f, 2.0f);
+glm::vec3 lightPosition(1.0f, 1.0f, -2.0f);
+glm::vec3 lightColor = glm::vec3(1.0f);
+glm::vec4 lightVector = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
 
 
 
@@ -97,7 +97,8 @@ void printAngle(float _angle)
 {
     cout << _angle << endl;
 }
-void printOpenGLInfo()
+
+void printOpenGLInfo(const bool printInfo)
 {
     if (printInfo)
     {
@@ -146,4 +147,26 @@ glm::mat4 Mat4_MVP(float M_angle,      // 模型角度
     projection = glm::perspective(P_angle, P_width / P_height, P_Near, P_Far);
 
     return projection * view * model;
+}
+// 加载纹理 返回图片数据 1.纹理 2.路径 3.图片是否为RGB
+unsigned char* loadTexture(GLuint& texture, const char* path, bool isRGB)
+{
+    int width, height, nrChannels;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    unsigned char* data = stbi_load(path, &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        if (isRGB)
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        if (!isRGB)
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    stbi_image_free(data);
+    return data;
 }

@@ -1,7 +1,17 @@
 ﻿#version 330 core
+struct Light {
+    vec3 position;
+
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
+
+Light light;
+
 out vec4 FragColor;
 
 void main()
 {
-    FragColor = vec4(1.0); // 将向量的四个分量全部设置为1.0
+    FragColor = vec4(1.0);
 }
