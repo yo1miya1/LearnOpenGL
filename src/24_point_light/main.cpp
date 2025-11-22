@@ -47,17 +47,20 @@ int main()
 
 
     // 纹理
-    unsigned int tex0, tex1;
+    unsigned int tex0, tex1, tex2;
     stbi_set_flip_vertically_on_load(true);
     float borderColor[] = { 0.3f, 0.1f, 0.7f, 1.0f };
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
     loadTexture(tex0, "./static/texture/container2.png", false);
     loadTexture(tex1, "./static/texture/lighting_maps_specular_color.png", false);
+    loadTexture(tex2, "./static/texture/matrix.jpg", true);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, tex0);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, tex1);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, tex2);
 
 
 
@@ -93,7 +96,8 @@ int main()
         processInput(window);
         // render
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);// 清除缓冲
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);// 清楚缓冲
+        
         
         
         float radius = 10.0f;
@@ -111,9 +115,9 @@ int main()
         model = glm::mat4_cast(qu);
         model = glm::mat4(1.0f);
         
-
-        glm::vec3 diffuseColor = lightColor * glm::vec3(0.7f); // 降低影响
-        glm::vec3 ambientColor = diffuseColor * glm::vec3(0.4f); // 很低的影响
+        glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f, 0.5f, 0.5f); // 降低影响
+        glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f, 0.2f, 0.2f); // 很低的影响
+        
 
 
         // Use Shader
@@ -127,15 +131,12 @@ int main()
         ourShader.setVec3("material.ambient", 1.0f, 1.0f, 1.0f);
         ourShader.setInt("material.diffuse", 0);
         ourShader.setInt("material.specular", 1);
+        ourShader.setInt("material.emissive", 2);
         ourShader.setFloat("material.shininess", 32.0f);
         
-        ourShader.setVec3("light.position", camera.Position);
-        ourShader.setVec3("light.direction", camera.Front);
-        ourShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
-        ourShader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
-
+        ourShader.setVec3("light.position", lightPosition);
         ourShader.setVec3("light.ambient", ambientColor);
-        ourShader.setVec3("light.diffuse", diffuseColor);
+        ourShader.setVec3("light.diffuse", diffuseColor); // 将光照调暗了一些以搭配场景
         ourShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
         ourShader.setFloat("light.constant", 1.0f);
