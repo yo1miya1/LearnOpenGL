@@ -14,8 +14,8 @@ class Shader
 {
 public:
     unsigned int ID;
-    static std::string dirName;
-    static bool lookShaderPath;
+    std::string dirName = "";
+    bool lookShaderPath = true;
     // constructor generates the shader on the fly
     // ------------------------------------------------------------------------
     Shader(const char* vertexPath, const char* fragmentPath)
