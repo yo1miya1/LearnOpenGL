@@ -1,5 +1,6 @@
 ﻿#include "main.h"
 
+
 int main()
 {
     // glfw初始化
@@ -33,7 +34,7 @@ int main()
     // 设置视口
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-
+    
     // Shader
     Shader ourShader("./src/shader/vertex.glsl", "./src/shader/fragment.glsl");
     Shader lightShader("./src/shader/lightvs.glsl", "./src/shader/lightfs.glsl");
@@ -61,6 +62,7 @@ int main()
     model = glm::mat4();
     model = glm::translate(model, lightPosition);
     model = glm::scale(model, glm::vec3(0.2f));
+
 
     // Render Loop
     while (!glfwWindowShouldClose(window))
@@ -92,7 +94,7 @@ int main()
         model = glm::mat4(1.0f);
         
 
-        glm::vec3 diffuseColor = lightColor * glm::vec3(0.7f); 
+        glm::vec3 diffuseColor = lightColor * glm::vec3(0.65f); 
         glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
 
         // Use Shader
@@ -108,10 +110,10 @@ int main()
         ourShader.setInt("material.specular",       1);
         ourShader.setFloat("material.shininess",    32.0f);
 
-        ChangeSpotLightColorWithTime();
+        //ChangeSpotLightColorWithTime();
         setDirLight(ourShader, glm::vec3(-1.0f), ambientColor, diffuseColor, glm::vec3(1.0f));
         setPointLights(ourShader, 4, pointLPosis, pointLAmbis, pointLDiffs, pointLSpecs, pointLc, pointLl, pointLq);
-        setSpotLight(ourShader, camera.Position, camera.Front, glm::vec3(0.0f), glm::vec3(0.5f), glm::vec3(1.0f), 12.5f, 15.0f, 1.0f, 0.09f, 0.032f);
+        setSpotLight(ourShader, camera.Position, camera.Front, glm::vec3(0.0f), glm::vec3(0.7f), glm::vec3(1.0f), 12.5f, 15.0f, 1.0f, 0.09f, 0.032f);
 
         for (unsigned int i = 0; i < 10; i++)
         {
