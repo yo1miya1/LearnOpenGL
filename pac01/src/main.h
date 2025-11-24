@@ -24,8 +24,10 @@
 #include <iostream>
 using namespace std;
 
+#include "myLight.h"
 
-const unsigned int SCR_WIDTH = 1920;
+
+const unsigned int SCR_WIDTH = 1600;
 const unsigned int SCR_HEIGHT = 1080;
 
 // camera
@@ -98,46 +100,3 @@ void printOpenGLInfo(const bool printInfo)
         cout << "GPU: " << glGetString(GL_RENDERER) << endl;
     }
 }
-glm::mat4 transMat(glm::mat4 _mat,      // 变换矩阵
-    glm::vec3 _rotAixs,                 // 旋转轴
-    float _angle,                       // 旋转角度
-    glm::vec3 _scale,                   // 缩放比例
-    glm::vec3 _pos)                     // 位置
-{
-    _mat = glm::translate(_mat, _pos);
-    _mat = glm::rotate(_mat, glm::radians(_angle), _rotAixs);
-    _mat = glm::scale(_mat, _scale);
-    return _mat;
-}
-void resetTransMats(glm::mat4 _mat,     // 变换矩阵
-    glm::vec3 _rotAixs,                 // 旋转轴
-    float _angle,                       // 旋转角度
-    glm::vec3 _scale,                   // 缩放比例
-    glm::vec3 _pos)                     // 位置
-{
-    _angle = 0.0f;
-    _mat = glm::mat4(1.0f);
-    _rotAixs = glm::vec3(0.0f, 0.0f, 1.0f);
-    _scale = glm::vec3(1.0f, 1.0f, 1.0f);
-    _pos = glm::vec3(0.0f, 0.0f, 0.0f);
-}
-glm::mat4 Mat4_MVP(float M_angle,      // 模型角度
-    glm::vec3 M_Aixs,   // 旋转轴
-    glm::vec3 V_pos,    // 视角位置
-    float P_angle,      // 视角角度
-    float P_width,      // 屏幕宽
-    float P_height,     // 屏幕高
-    float P_Near,       // 近裁平面
-    float P_Far)        // 远裁平面
-{
-    glm::mat4 model = glm::mat4(1.0f);
-    glm::mat4 view = glm::mat4(1.0f);
-    glm::mat4 projection = glm::mat4(1.0f);
-
-    model = glm::rotate(model, M_angle, M_Aixs);
-    view = glm::translate(view, V_pos);
-    projection = glm::perspective(P_angle, P_width / P_height, P_Near, P_Far);
-
-    return projection * view * model;
-}
-

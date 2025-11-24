@@ -1,6 +1,6 @@
 ﻿#include "main.h"
 
-#include "myFunc.h"
+
 int main()
 {
     // glfw初始化

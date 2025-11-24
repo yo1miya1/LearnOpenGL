@@ -143,7 +143,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\main.h" />
-    <ClInclude Include="src\myFunc.h" />
+    <ClInclude Include="src\myLight.h" />
+    <ClInclude Include="src\myMatrix.h" />
+    <ClInclude Include="src\MyTexClass.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

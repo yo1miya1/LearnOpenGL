@@ -34,7 +34,13 @@
     <ClInclude Include="src\main.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\myFunc.h">
+    <ClInclude Include="src\myLight.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MyTexClass.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\myMatrix.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
