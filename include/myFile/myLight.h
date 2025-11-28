@@ -17,8 +17,8 @@
         vec3 ambient;
         vec3 diffuse;
         vec3 specular;
-    }
-    uniform DirLight dirLight;
+    };
+uniform DirLight dirLight;
 
     点光源 
     struct PointLight
@@ -30,11 +30,11 @@
     float constant;
     float linear;
     float quadratic;
-    }
+    };
         单
-    uniform PointLight pointLight;
+uniform PointLight pointLight;
         多
-    uniform PointLight pointLights[num];
+uniform PointLight pointLights[num];
 
     聚光光源
     struct SpotLight
@@ -49,8 +49,8 @@
         float constant;
         float linear;
         float quadratic;
-    }
-    uniform SpotLight spotLight;
+    };
+uniform SpotLight spotLight;
 
 */
 
@@ -64,13 +64,25 @@ struct DirLight
     glm::vec3 diffuse;
     glm::vec3 specular;
 
-    DirLight() : direction(glm::vec3(0.0f, -1.0f, 0.0f)), ambient(glm::vec3(0.05f)), diffuse(glm::vec3(0.4f)), specular(glm::vec3(1.0f)) {}
-    DirLight(glm::vec3 dir) : direction(dir), ambient(glm::vec3(0.05f)), diffuse(glm::vec3(0.4f)), specular(glm::vec3(1.0f)) {}
-    DirLight(glm::vec3 dir, glm::vec3 amb, glm::vec3 diff, glm::vec3 spec) : direction(dir), ambient(amb), diffuse(diff), specular(spec) {}
+    DirLight() : direction(glm::vec3(0.0f)), ambient(glm::vec3(0.05f)), diffuse(glm::vec3(0.4f)), specular(glm::vec3(1.0f)) {}
+    DirLight(glm::vec3 dir)
+    {
+        direction=dir;
+        ambient=glm::vec3(0.05f);
+        diffuse=glm::vec3(0.4f);
+        specular=glm::vec3(1.0f);
+    }
+    DirLight(glm::vec3 dir, glm::vec3 amb, glm::vec3 diff, glm::vec3 spec)
+    {
+        direction= dir;
+        ambient = amb;
+        diffuse = diff;
+        specular = spec;
+    }
 
     // 平行光
     // shader名 
-    void setDirLight(Shader Shader)
+    void set(Shader Shader)
     {
         Shader.setVec3("dirLight.direction", this->direction);
         Shader.setVec3("dirLight.ambient", this->ambient);
@@ -117,6 +129,14 @@ void setPointLight(Shader Shader, PointLight light)
     Shader.setFloat("pointLights.linear", light.linear);
     Shader.setFloat("pointLights.quadratic", light.quadratic);
 }
+// 点光源 颜色随时间变化
+void ChangePointLightColorWithTime(glm::vec3 pointLDiffs[])
+{
+    pointLDiffs[0] = glm::vec3(sin(glfwGetTime()), 0.0f, 0.0f);
+    pointLDiffs[1] = glm::vec3(-sin(glfwGetTime()), sin(glfwGetTime()), 0.0f);
+    pointLDiffs[2] = glm::vec3(sin(glfwGetTime()), -0.0f, -sin(glfwGetTime()));
+    pointLDiffs[3] = glm::vec3(0.0f, -sin(glfwGetTime()), sin(glfwGetTime()));
+}
 
 
 
@@ -134,30 +154,60 @@ struct SpotLight
     float constant;
     float linear;
     float quadratic;
+
+    SpotLight()
+    {
+        position    = glm::vec3(0.0f);
+        direction   = glm::vec3(0.0f, -1.0f, 0.0f);
+        cutOff      = 12.5f;
+        outerCutOff = 17.5f;
+        ambient     = glm::vec3(0.0f);
+        diffuse     = glm::vec3(1.0f);
+        specular    = glm::vec3(1.0f);
+        constant    = 1.0f;
+        linear      = 0.09f;
+        quadratic   = 0.032f;
+    }
+    SpotLight
+        (glm::vec3 pos,
+        glm::vec3 dir,
+        float cO,
+        float oCO,
+        glm::vec3 amb,
+        glm::vec3 dif,
+        glm::vec3 spe,
+        float cons,
+        float line,
+        float quad)
+    {
+        position = pos;
+        direction = dir;
+        cutOff = cO;
+        outerCutOff = oCO;
+        ambient = amb;
+        diffuse = dif;
+        specular = spe;
+        constant = cons;
+        linear = line;
+        quadratic = quad;
+    }
+
+    // 聚光 
+    // shader名 聚光结构
+    void set(Shader Shader)
+    {
+        float inRa = glm::cos(glm::radians(this->cutOff));
+        float outRa = glm::cos(glm::radians(this->outerCutOff));
+        // SpotLight
+        Shader.setVec3("spotLight.position", this->position);
+        Shader.setVec3("spotLight.direction", this->direction);
+        Shader.setFloat("spotLight.cutOff", inRa);
+        Shader.setFloat("spotLight.outerCutOff", outRa);
+        Shader.setFloat("spotLight.constant", this->constant);
+        Shader.setFloat("spotLight.linear", this->linear);
+        Shader.setFloat("spotLight.quadratic", this->quadratic);
+        Shader.setVec3("spotLight.ambient", this->ambient);
+        Shader.setVec3("spotLight.diffuse", this->diffuse);
+        Shader.setVec3("spotLight.specular", this->specular);
+    }
 };
-// 聚光 
-// shader名 聚光结构
-void setSpotLight(Shader Shader, SpotLight light)
-{
-    float inRa = glm::cos(glm::radians(light.cutOff));
-    float outRa = glm::cos(glm::radians(light.outerCutOff));
-    // SpotLight
-    Shader.setVec3("spotLight.position", light.position);
-    Shader.setVec3("spotLight.direction", light.direction);
-    Shader.setFloat("spotLight.cutOff", inRa);
-    Shader.setFloat("spotLight.outerCutOff", outRa);
-    Shader.setFloat("spotLight.constant", light.constant);
-    Shader.setFloat("spotLight.linear", light.linear);
-    Shader.setFloat("spotLight.quadratic", light.quadratic);
-    Shader.setVec3("spotLight.ambient", light.ambient);
-    Shader.setVec3("spotLight.diffuse", light.diffuse);
-    Shader.setVec3("spotLight.specular", light.specular);
-}
-// 聚光颜色随时间变化
-void ChangeSpotLightColorWithTime(glm::vec3 pointLDiffs[])
-{
-    pointLDiffs[0] = glm::vec3(sin(glfwGetTime()), 0.0f, 0.0f);
-    pointLDiffs[1] = glm::vec3(-sin(glfwGetTime()), sin(glfwGetTime()), 0.0f);
-    pointLDiffs[2] = glm::vec3(sin(glfwGetTime()), -0.0f, -sin(glfwGetTime()));
-    pointLDiffs[3] = glm::vec3(0.0f, -sin(glfwGetTime()), sin(glfwGetTime()));
-}

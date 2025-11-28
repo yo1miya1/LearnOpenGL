@@ -43,9 +43,9 @@ public:
         try
         {
             vShaderFile.open(vertexFullPath.c_str());
-            if (!vShaderFile.is_open()) {std::cout << "ERROR::VertexShaderFilePath is not valid" << std::endl;}
+            if (!vShaderFile.is_open()) {std::cout << "ERROR::VS::CAN`T_OPEN_FILE" << std::endl;}
             fShaderFile.open(fragmentFullPath.c_str());
-            if (!vShaderFile.is_open()) {std::cout << "ERROR::FragmentShaderFilePath is not valid" << std::endl;}
+            if (!vShaderFile.is_open()) {std::cout << "ERROR::FS::CAN`T_OPEN_FILE" << std::endl;}
 
             std::stringstream vShaderStream, fShaderStream;
             vShaderStream << vShaderFile.rdbuf();
@@ -59,7 +59,7 @@ public:
         }
         catch (std::ifstream::failure& e)
         {
-            std::cout << "ERROR::SHADER::" << e.what() << std::endl;
+            std::cout << "ERROR::SHADER::PATH_IS_NOT_VAILD" << std::endl << e.what() << std::endl;
         }
 
         const char* vShaderCode = vertexCode.c_str();

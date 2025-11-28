@@ -1,3 +1,4 @@
+﻿#ifndef PLANE_GROMETRY
 #define PLANE_GROMETRY
 
 #include <geometry/BufferGeometry.h>
