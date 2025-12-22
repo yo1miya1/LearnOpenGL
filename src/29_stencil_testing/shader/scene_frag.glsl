@@ -63,9 +63,8 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 float LinearizeDepth(float depth, float near, float far);
 
-vec3 result = vec3(1.0, 1.0, 1.0);
-vec4 color;
-vec4 texMap;
+vec3 result;
+
 
 // 计算定向光
 vec3 CalcDirectionLight(DirectionLight light, vec3 normal, vec3 viewDir) {
@@ -148,7 +147,7 @@ void FinalColor()
       result += CalcPointLight(pointLights[i], normal, outFragPos, viewDir);
     }
 
-    texMap = texture(brickMap, outTexCoord);
+    result *= texture(brickMap, outTexCoord).rgb;
 }
 // 深度缓冲
 void DebugDepth()
@@ -162,16 +161,11 @@ void StencilOutLine()
     result = mix(result, vec3(0.0f, 0.0f, 1.0f), stencil);// 模板描边
 }
 
-void Blend()
-{
-    color = vec4(result, 1.0) * texMap;
-    FragColor = color;
-}
-
 // main
 void main() {
     FinalColor();
 //    DebugDepth();// 深度缓冲
     StencilOutLine();// 模板描边
-    Blend();
+
+    FragColor = vec4(result, 1.0);
 }
