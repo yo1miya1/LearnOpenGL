@@ -49,8 +49,12 @@ int main()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glEnable(GL_DEPTH_TEST);
+    // OpenGL global settings
+    glEnable(GL_DEPTH_TEST);//DepthTest
     glDepthFunc(GL_LESS);
+    glEnable(GL_STENCIL_TEST);//StengilTest
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
     // 鼠标键盘事件
     // 1.注册窗口变化监听
@@ -152,8 +156,7 @@ int main()
 
         // 渲染指令
         // ...
-        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        Clear();
         
         sceneShader.use();
 
@@ -209,14 +212,23 @@ int main()
         sceneShader.setFloat("uvScale", 4.0f);
         sceneShader.setMat4("model", model);
 
+        // 绘制地板
+        glStencilMask(0x00);
+
         glBindVertexArray(planeGeometry.VAO);
         glDrawElements(GL_TRIANGLES, planeGeometry.indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
 
+        // 正常绘制对象写入缓冲区
+        glStencilFunc(GL_ALWAYS, 1, 0xff);
+        glStencilMask(0xff);
+
+        //-------------------------------------------------------------
         // 绘制砖块
         glBindTexture(GL_TEXTURE_2D, brickMap);
         model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(1.0, 1.0, -1.0));
         model = glm::scale(model, glm::vec3(2.0, 2.0, 2.0));
-        model = glm::translate(model, glm::vec3(1.0, 0.5, -1.0));
 
         sceneShader.setFloat("uvScale", 1.0f);
         sceneShader.setMat4("model", model);
@@ -230,6 +242,39 @@ int main()
 
         glBindVertexArray(boxGeometry.VAO);
         glDrawElements(GL_TRIANGLES, boxGeometry.indices.size(), GL_UNSIGNED_INT, 0);
+
+        // 绘制放大的版本，然后禁用模板写入
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilMask(0x00);
+        glDisable(GL_DEPTH_TEST);
+
+        sceneShader.setFloat("stencil", 1.0);
+        float scale = 1.03;
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(1.0, 1.0, -1.0));
+        model = glm::scale(model, glm::vec3(2.0 * scale, 2.0 * scale, 2.0 * scale));
+
+        sceneShader.setFloat("uvScale", 1.0f);
+        sceneShader.setMat4("model", model);
+
+        glBindVertexArray(boxGeometry.VAO);
+        glDrawElements(GL_TRIANGLES, boxGeometry.indices.size(), GL_UNSIGNED_INT, 0);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-1.0, 0.5, 2.0));
+        model = glm::scale(model, glm::vec3(scale, scale, scale));
+        sceneShader.setMat4("model", model);
+
+        glBindVertexArray(boxGeometry.VAO);
+        glDrawElements(GL_TRIANGLES, boxGeometry.indices.size(), GL_UNSIGNED_INT, 0);
+
+        glBindVertexArray(0);
+        glStencilMask(0xff);
+        glStencilFunc(GL_ALWAYS, 1, 0xff);
+        glEnable(GL_DEPTH_TEST);
+        sceneShader.setFloat("stencil", 0.0);
+        //-------------------------------------------------------------
+
 
         // 绘制灯光物体
         // ************************************************************
@@ -273,4 +318,11 @@ int main()
     glfwTerminate();
 
     return 0;
+}
+
+// 清屏
+void Clear()
+{
+    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);//ClearColor
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);//清除缓冲
 }

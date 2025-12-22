@@ -366,3 +366,5 @@ FodyWeavers.xsd
 # myIgnore
 Intermediate/
 pac01/static/
+bin/pac01.
+bin/pac01.pdb

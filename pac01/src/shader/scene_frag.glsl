@@ -53,6 +53,7 @@ in vec3 outFragPos;
 
 uniform vec3 viewPos;
 uniform float factor; // 变化值
+uniform float stencil; // 模板值
 
 float near = 0.1;
 float far = 100.0;
@@ -62,6 +63,7 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 float LinearizeDepth(float depth, float near, float far);
 
+vec3 result;
 
 
 // 计算定向光
@@ -130,14 +132,14 @@ float LinearizeDepth(float depth, float near, float far) {
   float z = depth * 2.0 - 1.0;
   return (2.0 * near * far) / (far + near - z * (far - near));
 }
-// aaaa
-vec3 aaaa()
+// FinalColor
+void FinalColor()
 {
     vec3 viewDir = normalize(viewPos - outFragPos);
     vec3 normal = normalize(outNormal);
 
     // 定向光照
-    vec3 result = CalcDirectionLight(directionLight, normal, viewDir);
+    result = CalcDirectionLight(directionLight, normal, viewDir);
 
     // 点光源
     for(int i = 0; i < NR_POINT_LIGHTS; i++) 
@@ -146,19 +148,24 @@ vec3 aaaa()
     }
 
     result *= texture(brickMap, outTexCoord).rgb;
-    
-    return result;
 }
-// bbbb
-float bbbb()
+// 深度缓冲
+void DebugDepth()
 {
     float depth = LinearizeDepth(gl_FragCoord.z, near, far) / far; // 为了演示除以 far
-    return depth;
+    result = vec3(depth);
 }
+// 模板缓冲描边
+void StencilOutLine()
+{
+    result = mix(result, vec3(0.0f, 0.0f, 1.0f), stencil);// 模板描边
+}
+
 // main
 void main() {
-  
+    FinalColor();
+//    DebugDepth();// 深度缓冲
+    StencilOutLine();// 模板描边
 
-    FragColor = vec4(aaaa(), 1.0);
-//    FragColor = vec4(vec3(bbbb()), 1.0);
+    FragColor = vec4(result, 1.0);
 }

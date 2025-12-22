@@ -147,3 +147,5 @@ void printOpenGLInfo(const bool printInfo)
         cout << "GPU: " << glGetString(GL_RENDERER) << endl;
     }
 }
+
+void Clear();
