@@ -17,11 +17,11 @@ uniform mat4 projection;
 
 void main()
 {
-    gl_Position = projection * view * model * vec4(Position, 1.0f);
+	gl_Position = projection * view * model * vec4(Position, 1.0f);
 
-  outFragPos = vec3(model * vec4(Position, 1.0));
+	outFragPos = vec3(model * vec4(Position, 1.0));
 
-  outTexCoord = TexCoords * uvScale;
+	outTexCoord = TexCoords * uvScale;
 
-  outNormal = mat3(transpose(inverse(model))) * Normal;
+	outNormal = mat3(transpose(inverse(model))) * Normal;
 }

@@ -134,6 +134,8 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\shader\postShader_frag.glsl" />
+    <None Include="src\shader\postShader_vert.glsl" />
     <None Include="src\shader\scene_frag.glsl" />
     <None Include="src\shader\light_object_frag.glsl" />
     <None Include="src\shader\light_object_vert.glsl" />
