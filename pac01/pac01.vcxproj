@@ -134,16 +134,12 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\shader\postShader_frag.glsl" />
-    <None Include="src\shader\postShader_vert.glsl" />
-    <None Include="src\shader\scene_frag.glsl" />
-    <None Include="src\shader\light_object_frag.glsl" />
-    <None Include="src\shader\light_object_vert.glsl" />
-    <None Include="src\shader\light_frag.glsl" />
-    <None Include="src\shader\light_vert.glsl" />
-    <None Include="src\shader\scene_vert.glsl" />
-    <None Include="src\shader\skybox_frag.glsl" />
-    <None Include="src\shader\skybox_vert.glsl" />
+    <None Include="src\shader\cube_map_frag.glsl" />
+    <None Include="src\shader\cube_map_vert.glsl" />
+    <None Include="src\shader\reflect_obj_frag.glsl" />
+    <None Include="src\shader\reflect_obj_vert.glsl" />
+    <None Include="src\shader\refract_obj_frag.glsl" />
+    <None Include="src\shader\refract_obj_vert.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\main.h" />
