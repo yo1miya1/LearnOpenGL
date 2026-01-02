@@ -13,6 +13,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <tool/stb_image.h>
 
+//#include <tool/gui.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -22,13 +23,12 @@ unsigned int loadCubemap(vector<std::string> faces);
 
 void drawSkyBox(Shader shader, BoxGeometry geometry, unsigned int cubeMap);
 
-//Cull
-void CullFace(bool use);
+//std::string Shader::dirName;
 
-//int SCREEN_WIDTH = 800;
-//int SCREEN_HEIGHT = 600;
-int SCREEN_WIDTH = 1920;
-int SCREEN_HEIGHT = 1080;
+int SCREEN_WIDTH = 800;
+int SCREEN_HEIGHT = 600;
+// int SCREEN_WIDTH = 1600;
+// int SCREEN_HEIGHT = 1200;
 
 // camera value
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -75,6 +75,18 @@ int main(int argc, char* argv[])
         return -1;
     }
 
+    // -----------------------
+    // 创建imgui上下文
+    //ImGui::CreateContext();
+    //ImGuiIO& io = ImGui::GetIO();
+    //(void)io;
+    //// 设置样式
+    //ImGui::StyleColorsDark();
+    //// 设置平台和渲染器
+    //ImGui_ImplGlfw_InitForOpenGL(window, true);
+    //ImGui_ImplOpenGL3_Init(glsl_version);
+
+    // -----------------------
 
     // 设置视口
     glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -174,6 +186,21 @@ int main(int argc, char* argv[])
         deltaTime = currentFrame - lastTime;
         lastTime = currentFrame;
 
+        // 在标题中显示帧率信息
+        // *************************************************************************
+        //int fps_value = (int)round(ImGui::GetIO().Framerate);
+        //int ms_value = (int)round(1000.0f / ImGui::GetIO().Framerate);
+
+        //std::string FPS = std::to_string(fps_value);
+        //std::string ms = std::to_string(ms_value);
+        //std::string newTitle = "LearnOpenGL - " + ms + " ms/frame " + FPS;
+        //glfwSetWindowTitle(window, newTitle.c_str());
+
+        //ImGui_ImplOpenGL3_NewFrame();
+        //ImGui_ImplGlfw_NewFrame();
+        //ImGui::NewFrame();
+        // *************************************************************************
+
         // 渲染指令
         // ...
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
@@ -200,6 +227,29 @@ int main(int argc, char* argv[])
         projection = glm::perspective(glm::radians(fov), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
 
         glm::vec3 lightPos = glm::vec3(lightPosition.x * glm::sin(glfwGetTime()) * 2.0, lightPosition.y, lightPosition.z);
+
+        // 绘制天空盒
+        // *****************************************
+        // glDepthFunc(GL_LEQUAL);
+        // glDisable(GL_DEPTH_TEST);
+
+        // skyboxShader.use();
+        // view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // 移除平移分量
+
+        // skyboxShader.setMat4("view", view);
+        // skyboxShader.setMat4("projection", projection);
+
+        // glActiveTexture(GL_TEXTURE0);
+        // glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+        // glBindVertexArray(skyboxGeometry.VAO);
+        // glDrawElements(GL_TRIANGLES, skyboxGeometry.indices.size(), GL_UNSIGNED_INT, 0);
+
+        // glBindVertexArray(0);
+        // glDepthFunc(GL_LESS);
+        // glEnable(GL_DEPTH_TEST);
+        // view = camera.GetViewMatrix();
+
+        // *****************************************
 
         sceneShader.use();
         factor = glfwGetTime();
@@ -228,7 +278,6 @@ int main(int argc, char* argv[])
             sceneShader.setFloat("pointLights[" + std::to_string(i) + "].quadratic", 0.032f);
         }
 
-        CullFace(true);
         // 绘制地板
         // ********************************************************
         glm::mat4 model = glm::mat4(1.0f);
@@ -242,7 +291,6 @@ int main(int argc, char* argv[])
         glBindVertexArray(0);
         // ********************************************************
 
-        CullFace(true);
         // 绘制砖块
         // ----------------------------------------------------------
         glBindTexture(GL_TEXTURE_2D, brickMap);
@@ -264,7 +312,6 @@ int main(int argc, char* argv[])
         glDrawElements(GL_TRIANGLES, containerGeometry.indices.size(), GL_UNSIGNED_INT, 0);
         // ----------------------------------------------------------
 
-        CullFace(false);
         // 绘制草丛面板
         // ----------------------------------------------------------
         glBindVertexArray(grassGeometry.VAO);
@@ -287,7 +334,6 @@ int main(int argc, char* argv[])
         }
         // ----------------------------------------------------------
 
-        CullFace(true);
         // 绘制灯光物体
         // ************************************************************
         lightObjectShader.use();
@@ -314,7 +360,11 @@ int main(int argc, char* argv[])
             glBindVertexArray(pointLightGeometry.VAO);
             glDrawElements(GL_TRIANGLES, pointLightGeometry.indices.size(), GL_UNSIGNED_INT, 0);
         }
-        // ***********************************************************
+        // ************************************************************
+
+        // 渲染 gui
+        //ImGui::Render();
+        //ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -360,14 +410,6 @@ void processInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
         camera.ProcessKeyboard(RIGHT, deltaTime);
-    }
-    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-    {
-        camera.ProcessKeyboard(DOWN, deltaTime);
-    }
-    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-    {
-        camera.ProcessKeyboard(UP, deltaTime);
     }
 }
 
@@ -463,7 +505,6 @@ unsigned int loadCubemap(vector<std::string> faces)
 // *******************method*********************
 void drawSkyBox(Shader shader, BoxGeometry geometry, unsigned int cubeMap)
 {
-    CullFace(false);
 
     glDepthFunc(GL_LEQUAL);
     glDisable(GL_DEPTH_TEST);
@@ -486,16 +527,4 @@ void drawSkyBox(Shader shader, BoxGeometry geometry, unsigned int cubeMap)
     glDepthFunc(GL_LESS);
     glEnable(GL_DEPTH_TEST);
     view = camera.GetViewMatrix();
-}
-
-//Cull
-void CullFace(bool use)
-{
-    if (use)
-    {
-        glEnable(GL_CULL_FACE);//CullFace
-        glCullFace(GL_BACK);//CullFront
-    }
-    else
-        glDisable(GL_CULL_FACE);
 }
