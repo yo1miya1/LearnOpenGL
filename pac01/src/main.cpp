@@ -13,35 +13,37 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <tool/stb_image.h>
 
+#include <tool/gui.h>
+
 #include <tool/mesh.h>
 #include <tool/model.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void processInput(GLFWwindow* window);
-
 unsigned int loadTexture(char const* path);
 unsigned int loadCubemap(vector<std::string> faces);
 
 void drawSkyBox(Shader shader, BoxGeometry geometry, unsigned int cubeMap);
 
-int SCR_WIDTH = 800;
-int SCR_HEIGHT = 600;
-// int SCR_WIDTH = 1600;
-// int SCR_HEIGHT = 1200;
+
+int SCREEN_WIDTH = 800;
+int SCREEN_HEIGHT = 600;
+// int SCREEN_WIDTH = 1600;
+// int SCREEN_HEIGHT = 1200;
 
 // delta time
 float deltaTime = 0.0f;
 float lastTime = 0.0f;
 
-float lastX = SCR_WIDTH / 2.0f; // 鼠标上一帧的位置
-float lastY = SCR_HEIGHT / 2.0f;
+float lastX = SCREEN_WIDTH / 2.0f; // 鼠标上一帧的位置
+float lastY = SCREEN_HEIGHT / 2.0f;
 
-Camera camera(glm::vec3(0.0, 0.0, 3.0));
+Camera camera(glm::vec3(0.0, 0.0, 30.0));
 
 using namespace std;
 
-int main()
+int main(int argc, char* argv[])
 {
     glfwInit();
     // 设置主要和次要版本
@@ -54,7 +56,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // 窗口对象
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -69,32 +71,107 @@ int main()
         return -1;
     }
 
-    glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+    // -----------------------
+    // 创建imgui上下文
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    (void)io;
+    // 设置样式
+    ImGui::StyleColorsDark();
+    // 设置平台和渲染器
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init(glsl_version);
+    // -----------------------
+
+    // 设置视口
+    glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     glEnable(GL_PROGRAM_POINT_SIZE);
 
-
+    // 深度测试
     glEnable(GL_DEPTH_TEST);
 
+    // 鼠标键盘事件
+    // 1.注册窗口变化监听
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     // 2.鼠标事件
     glfwSetCursorPosCallback(window, mouse_callback);
     // 3.将鼠标隐藏
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-
     Shader sceneShader("./src/shader/scene_vert.glsl", "./src/shader/scene_frag.glsl");
-    Shader normalShader("./src/shader/normal_vert.glsl", "./src/shader/normal_frag.glsl", "./src/shader/normal_geo.glsl");
-    
-    PlaneGeometry planeGeometry(1.0, 1.0);          // 面板
-    BoxGeometry boxGeometry(1.0, 1.0, 1.0);         // 盒子
-    SphereGeometry sphereGeometry(1.0, 10.0, 10.0); // 圆球
+    Shader instanceShader("./src/shader/instance_vert.glsl", "./src/shader/scene_frag.glsl");
 
-    float fov = 45.0f;
-    Model ourModel("./static/model/walt/WaltHead.obj");
+    PlaneGeometry planeGeometry(0.1, 0.1);          // 面板
+    BoxGeometry boxGeometry(0.1, 0.1, 0.1);         // 盒子
+    SphereGeometry sphereGeometry(0.1, 10.0, 10.0); // 圆球
+
+    float fov = 45.0f;                                                          // 视锥体的角度
+    ImVec4 clear_color = ImVec4(25.0 / 255.0, 25.0 / 255.0, 25.0 / 255.0, 1.0); // 25, 25, 25
+
+    Model rock("./static/model/rock/rock.obj");
+    Model planet("./static/model/planet/planet.obj");
+
+    unsigned int amount = 100000;
+    glm::mat4* modelMatrices;
+    modelMatrices = new glm::mat4[amount];
+    srand(glfwGetTime()); // initialize random seed
+    float radius = 20.0;
+    float offset = 1.5f;
+    for (unsigned int i = 0; i < amount; i++)
+    {
+        glm::mat4 model = glm::mat4(1.0f);
+        // 1. translation: displace along circle with 'radius' in range [-offset, offset]
+        float angle = (float)i / (float)amount * 360.0f;
+        float displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+        float x = sin(angle) * radius + displacement;
+        displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+        float y = displacement * 0.4f; // keep height of asteroid field smaller compared to width of x and z
+        displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+        float z = cos(angle) * radius + displacement;
+        model = glm::translate(model, glm::vec3(x, y, z));
+
+        // 2. scale: Scale between 0.05 and 0.25f
+        float scale = (rand() % 20) / 1000.0f + 0.001;
+        model = glm::scale(model, glm::vec3(scale));
+
+        // 3. rotation: add random rotation around a (semi)randomly picked rotation axis vector
+        float rotAngle = (rand() % 360);
+        model = glm::rotate(model, rotAngle, glm::vec3(0.4f, 0.6f, 0.8f));
+
+        // 4. now add to list of matrices
+        modelMatrices[i] = model;
+    }
+
+    // 设置实例化数组
+    unsigned int buffer;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, amount * sizeof(glm::mat4), &modelMatrices[0], GL_STATIC_DRAW);
+    for (unsigned int i = 0; i < rock.meshes.size(); i++)
+    {
+        unsigned int VAO = rock.meshes[i].VAO;
+        glBindVertexArray(VAO);
+        // 顶点属性
+        GLsizei vec4Size = sizeof(glm::vec4);
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
+        glEnableVertexAttribArray(4);
+        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(vec4Size));
+        glEnableVertexAttribArray(5);
+        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
+        glEnableVertexAttribArray(6);
+        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
+
+        glVertexAttribDivisor(3, 1);
+        glVertexAttribDivisor(4, 1);
+        glVertexAttribDivisor(5, 1);
+        glVertexAttribDivisor(6, 1);
+
+        glBindVertexArray(0);
+    }
 
     float factor = 0.0;
-
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
@@ -103,40 +180,68 @@ int main()
         deltaTime = currentFrame - lastTime;
         lastTime = currentFrame;
 
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        // 在标题中显示帧率信息
+        // *************************************************************************
+        int fps_value = (int)round(ImGui::GetIO().Framerate);
+        int ms_value = (int)round(1000.0f / ImGui::GetIO().Framerate);
+
+        std::string FPS = std::to_string(fps_value);
+        std::string ms = std::to_string(ms_value);
+        std::string newTitle = "LearnOpenGL - " + ms + " ms/frame " + FPS;
+        glfwSetWindowTitle(window, newTitle.c_str());
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        factor = glfwGetTime();
+        // *************************************************************************
+
+        // 渲染指令
+        // ...
+        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glm::mat4 view = camera.GetViewMatrix();
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0, -1.0, 0.0));
 
         sceneShader.use();
         sceneShader.setMat4("projection", projection);
         sceneShader.setMat4("view", view);
+        model = glm::translate(model, glm::vec3(0.0f, -1.0f, 4.0f));
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
         sceneShader.setMat4("model", model);
-        sceneShader.setFloat("time", factor);
 
-        glBindVertexArray(boxGeometry.VAO);
-        glDrawElements(GL_POINTS, boxGeometry.indices.size(), GL_UNSIGNED_INT, 0);
+        planet.Draw(sceneShader);
 
-        glDrawElements(GL_LINE_LOOP, boxGeometry.indices.size(), GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+        // for (unsigned int i = 0; i < amount; i++)
+        // {
+        //   sceneShader.setMat4("model", modelMatrices[i]);
+        //   rock.Draw(sceneShader);
+        // }
 
+        instanceShader.use();
+        instanceShader.setMat4("projection", projection);
+        instanceShader.setMat4("view", view);
+        instanceShader.setInt("diffuseTexture", 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, rock.textures_loaded[0].id);
+        for (unsigned int i = 0; i < rock.meshes.size(); i++)
+        {
+            glBindVertexArray(rock.meshes[i].VAO);
+            glDrawElementsInstanced(GL_TRIANGLES, rock.meshes[i].indices.size(), GL_UNSIGNED_INT, 0, amount);
+        }
 
-        normalShader.use();
-        normalShader.setMat4("projection", projection);
-        normalShader.setMat4("view", view);
-        normalShader.setMat4("model", model);
-
-        glBindVertexArray(boxGeometry.VAO);
-        glDrawElements(GL_TRIANGLES, boxGeometry.indices.size(), GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+        // 渲染 gui
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
     glfwTerminate();
+
     return 0;
 }
 
@@ -171,14 +276,6 @@ void processInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
         camera.ProcessKeyboard(RIGHT, deltaTime);
-    }
-    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-    {
-        camera.ProcessKeyboard(DOWN, deltaTime);
-    }
-    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-    {
-        camera.ProcessKeyboard(UP, deltaTime);
     }
 }
 
@@ -279,7 +376,7 @@ void drawSkyBox(Shader shader, BoxGeometry geometry, unsigned int cubeMap)
     glDisable(GL_DEPTH_TEST);
 
     glm::mat4 view = camera.GetViewMatrix();
-    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
 
     shader.use();
     view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // 移除平移分量

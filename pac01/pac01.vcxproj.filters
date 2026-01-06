@@ -31,8 +31,9 @@
     <None Include="src\shader\normal_frag.glsl" />
     <None Include="src\shader\normal_geo.glsl" />
     <None Include="src\shader\normal_vert.glsl" />
-    <None Include="src\shader\scene_frag.glsl" />
-    <None Include="src\shader\scene_vert.glsl" />
+    <None Include="src\shader\instance.vert" />
+    <None Include="src\shader\scene.frag" />
+    <None Include="src\shader\scene.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\main.h">
