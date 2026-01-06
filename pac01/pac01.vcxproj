@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -134,17 +134,12 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\shader\default.vert" />
-    <None Include="src\shader\defualt.frag" />
-    <None Include="src\shader\normal_frag.glsl" />
-    <None Include="src\shader\normal_geo.glsl" />
-    <None Include="src\shader\normal_vert.glsl" />
-    <None Include="src\shader\normal_vis.frag" />
-    <None Include="src\shader\normal_vis.geom" />
-    <None Include="src\shader\normal_vis.vert" />
-    <None Include="src\shader\instance.vert" />
-    <None Include="src\shader\scene.frag" />
-    <None Include="src\shader\scene.vert" />
+    <None Include="src\shader\cube_map_frag.glsl" />
+    <None Include="src\shader\cube_map_vert.glsl" />
+    <None Include="src\shader\reflect_obj_frag.glsl" />
+    <None Include="src\shader\reflect_obj_vert.glsl" />
+    <None Include="src\shader\refract_obj_frag.glsl" />
+    <None Include="src\shader\refract_obj_vert.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\main.h" />

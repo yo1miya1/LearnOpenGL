@@ -1,4 +1,4 @@
-#ifndef CAMERA_H
+﻿#ifndef CAMERA_H
 #define CAMERA_H
 
 #include <glad/glad.h>
@@ -13,7 +13,9 @@ enum Camera_Movement
 	FORWARD,
 	BACKWARD,
 	LEFT,
-	RIGHT
+	RIGHT,
+	UP,
+	DOWN
 };
 
 // Default camera values
@@ -78,6 +80,10 @@ public:
 			Position -= Right * velocity;
 		if (direction == RIGHT)
 			Position += Right * velocity;
+		if (direction == UP)
+			Position += WorldUp * velocity;
+		if (direction == DOWN)
+			Position -= WorldUp * velocity;
 
 		// Position.y = 0.0f;
 	}
